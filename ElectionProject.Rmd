@@ -1,0 +1,126 @@
+---
+title: "ElectionProject"
+author: "Daniel Bies and Gonzalo Del Carpio"
+date: "November 30, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+### For this project we looked at political donation patterns of Americans with science intensive jobs. This included engineers, scientists, and math-staticians. The data is from 3 cycles of elections of house, senate, and the president. 
+
+
+
+```{r}
+library(ggplot2)
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(googleVis)
+sciencefederalgiving <- read_excel("~/Desktop/Data Visualization/sciencefederalgiving.xlsx")
+gov=sciencefederalgiving
+```
+
+
+## 1.Please study differences in donations across different states among people with science-intensive jobs for Presidential elections across the three election cycles.
+
+
+```{r}
+#To divide dataset by year
+yr08= filter(gov, cycle == "2008")
+yr12= filter(gov, cycle == "2012")
+yr16= filter(gov, cycle == "2016")
+
+#To divide dataset by committee type
+House= filter(gov, cmte_tp == "H")
+Senate= filter(gov, cmte_tp == "S")
+Prez= filter(gov, cmte_tp == "P")
+
+#To divide by classification
+Eng= filter(gov, classification == "Engineer")
+Math= filter(gov, classification == "Math-Stat")
+Sci= filter(gov, classification == "Scientist")
+
+#To Seperate Presidential Donations in Election years
+Prez8= filter(yr08, cmte_tp == "P")
+Prez12= filter(yr12, cmte_tp == "P")
+Prez16= filter(yr16, cmte_tp == "P")
+```
+
+
+#### The data we were provided with included some US territories but still important to note that we wanted to keep them in there because they contributed to the elections.
+
+```{r}
+#To find average, grouped by State
+
+Avg08=Prez8%>%group_by(state)%>%summarize(mean =mean(`2016_dollars`))
+Avg12=Prez12%>%group_by(state)%>%summarize(mean =mean(`2016_dollars`))
+Avg16=Prez16%>%group_by(state)%>%summarize(mean =mean(`2016_dollars`))
+
+ggplot(Avg08, aes(state, mean)) + geom_point() + coord_flip()
+ggplot(Avg12, aes(state, mean)) + geom_point() + coord_flip()
+ggplot(Avg16, aes(state, mean)) + geom_point() + coord_flip()
+```
+
+#### With this data we were able to look at the distribution of the mean of donations that each state contributed in general for each cycle of Presidential selections. The dollar amounts we used were the transaction amounts of the donations adjusted with the current inflation rate, so the data was more accurately comparable across the different years. When looking at the data presented this way, there is a clear trend towards a lower average donation among the states. We believe that the data from 2016 is incomplete, but the trend was present from 2008 to 2012 as well. In addition, it's worth noting that the low amount of donations from the territories and foreign donations make for interesting data points, but usually outliers in the data.
+
+
+
+## The House of Representatives
+
+```{r}
+new=House%>%group_by(cmte_tp, classification, cycle)%>%summarize(mean =mean(`2016_dollars`))
+```
+
+```{r}
+House_by_job <- ggplot(data = new, aes(x=reorder(classification, mean),  y=mean, fill=as.factor(cycle))) + geom_bar(stat="identity", alpha=1) + coord_flip()+ labs(list(title = "Donations to The House by Profession and Year", x = "Professional Field", y = "Mean Donation Dollars"))
+
+plot(House_by_job)
+
+```
+
+
+#### From this graph, we can gather that Engineers are donating the most to House elections, followed by Scientists and Mathematicians. This makes sense, because their levels of disposable income would also fall in this order, so naturally their donations would be ordered that way as well. There is also a sharp decrease in donations in 2016, again suggesting a downturn in donation size in that year.
+
+## The Senate
+
+```{r}
+new1=Senate%>%group_by(cmte_tp, classification, cycle)%>%summarize(mean =mean(`2016_dollars`))
+```
+
+
+```{r}
+Senate_by_job <- ggplot(data = new1, aes(x=reorder(classification, mean),  y=mean, fill=as.factor(cycle))) + geom_bar(stat="identity", alpha=1) + coord_flip()+ labs(list(title = "Donations to Senate by Profession and Year", x = "Professional Field", y = "Mean Donation Dollars"))
+
+plot(Senate_by_job)
+
+```
+
+#### Similar to the House, Engineers led the way in Senate donations. This is again believed to be correlated to higher disposable income. Another reason why this could be occurring is the influence that the Senate and House have over infrastructure across the US, which engineers are building. In addition, Scientists are concerned about different science related topics such as climate change. However, there is not much policy that greatly affects Mathematicians, which could be a reason for their lower donations.
+
+
+## The President
+
+```{r}
+new2=Prez%>%group_by(cmte_tp, classification, cycle)%>%summarize(mean =mean(`2016_dollars`))
+```
+
+
+```{r}
+Prez_by_job <- ggplot(data = new2, aes(x=reorder(classification, mean),  y=mean, fill=as.factor(cycle))) + geom_bar(stat="identity", alpha=1) + coord_flip()+ labs(list(title = "Donations to President by Profession and Year", x = "Professional Field", y = "Mean Donation Dollars"))
+
+plot(Prez_by_job)
+
+```
+
+
+#### From looking at donations for the presidential elections throughout scientists, engineers, and math-staticians we can see that on average scientists have donated the most and math-staticians the least. It is interesting that math-staticians donated very little to none to the presidential elections during 2010 compared to scientists who donated the most amount of any year during 2010. Something to also take into account is that this is in between a presidential term since the past election would have been in 2008 while the next one would be in 2012. The reason why scientists may have been donating more is to increase campaign efforts for presidents who were focusing on environmental issues such as global warming.
+
+
+### Conclusions/ Closing Remarks
+
+#### The data we were provided with was definitely interesting to interpret. Not having a large political background may have been an issue in coming up with why we observed some of the results that we did but still intriguing nonetheless. The 2016 data seem to be pretty limited and low across most graphs which is concerning due to the amount of money that is spent nowadays compared to years ago. We are not sure if the data is flawed or something within our analysis went wrong but it definitely is a limitation. It was also interesting that the data included US territories as well, many people probably do not even realize that some contributions come from outside the US. All in all, interesting to see how the scientific community allocates their money amongst politics.
