@@ -54,7 +54,7 @@ Prez16= filter(yr16, cmte_tp == "P")
 
 #### The data we were provided with included some US territories but still important to note that we wanted to keep them in there because they contributed to the elections.
 
-```{r}
+```{r fig1, fig.height=8, fig.width=8}
 #To find average, grouped by State
 
 Avg08=Prez8%>%group_by(state)%>%summarize(mean =mean(`2016_dollars`))
